@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -10,7 +11,7 @@ func main() {
 
 	// server static files from ./ui/static at URI base /static
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/static/", disableDirListing(http.StripPrefix("/static", fileServer)))
 
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/snippet/view", snippetView)
@@ -21,4 +22,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func disableDirListing(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
