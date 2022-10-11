@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS snippetbox;
+
 CREATE DATABASE snippetbox CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE snippetbox;
@@ -13,10 +15,12 @@ CREATE TABLE snippets (
 CREATE INDEX idx_snippets_created ON snippets(created);
 
 -- application user
-CREATE USER 'web'@'localhost';
+DROP USER IF EXISTS 'web'@'%';
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON snippetbox.* TO 'web'@'localhost';
-ALTER USER 'web'@'localhost' IDENTIFIED BY 'dev';
+CREATE USER 'web'@'%' IDENTIFIED BY 'dev';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON snippetbox.* TO 'web'@'%';
+
 
 -- initial test data
 INSERT INTO snippets (title, content, created, expires) VALUES (
