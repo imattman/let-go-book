@@ -21,7 +21,8 @@ type application struct {
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address and port")
 	// note: parseTime=true is driver-specific config to convert datetimes to time.Time
-	dsn := flag.String("dsn", "web:dev@/snippetbox?parseTime=true", "MySQL datasouce name")
+	//dsn := flag.String("dsn", "web:dev@/snippetbox?parseTime=true", "MySQL datasouce name")
+	dsn := flag.String("dsn", "web:dev@/snippetbox?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci", "MySQL datasouce name")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)

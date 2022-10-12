@@ -71,9 +71,8 @@ start() {
     -p 3306:3306 \
     --name="$DOCKER_NAME_MYSQL" \
     -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
-    mysql
-
-  sleep 4
+    mysql \
+    --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 }
 
 initdb() {
