@@ -1,8 +1,49 @@
 package main
 
-import "snippetbox.mattman.net/internal/models"
+import (
+	"html/template"
+	"path/filepath"
+
+	"snippetbox.mattman.net/internal/models"
+)
 
 type templateData struct {
 	Snippet  *models.Snippet
 	Snippets []*models.Snippet
+}
+
+func newTemplateCache() (map[string]*template.Template, error) {
+	cache := make(map[string]*template.Template)
+
+	// load all page templates
+	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, page := range pages {
+		name := filepath.Base(page)
+
+		// always include the base template
+		ts, err := template.ParseFiles("./ui/html/base.tmpl")
+		if err != nil {
+			return nil, err
+		}
+
+		// update the parsed template set to include any partials
+		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
+		if err != nil {
+			return nil, err
+		}
+
+		// finally, add the page template to the parsed set
+		ts, err = ts.ParseFiles(page)
+		if err != nil {
+			return nil, err
+		}
+
+		cache[name] = ts
+	}
+
+	return cache, nil
 }
