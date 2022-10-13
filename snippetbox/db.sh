@@ -10,6 +10,7 @@ fi
 THIS_SCRIPT="${0##*/}"
 BASE_DIR="$(cd "${0%/*}" && pwd)"
 
+SQL_INIT_FILE="$BASE_DIR/db-init.sql"
 DOCKER_NAME_MYSQL="${DOCKER_NAME_MYSQL:-mysql-snippetbox}"
 MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-tiger}"
 
@@ -23,22 +24,14 @@ usage() {
 	
 	Init script for MySQL in docker for snippetbox app.
 
-	WARNING
-
-	  This uses a docker image without a backing data volume.
-	  All data is ephemeral and lost at shutdown.
-	
 	COMMANDS
 
-	  start      Start MySQL docker image.
-	  initdb     Initialize DB schema
-	  all        Run all set up steps
-    
+	  start      Start DB container via docker-compose
+	  init       Initialize DB schema
+
 	  client     Connect to $MYSQL_DB with user credentials
-	  show-recs  Show records from snippets table
-
-	  stop       Shutdown MySQL docker image
-
+	  snippets   Show records from snippets table
+	  charset    Show charset of client session
 
 	OPTIONS
 	   -h        Show this message
@@ -63,8 +56,12 @@ check() {
   fi
 }
 
-
 start() {
+  echo "Starting via docker-compose..."
+  cd $BASE_DIR && docker-compose up -d
+}
+
+start-manual() {
   echo "Starting container with name $DOCKER_NAME_MYSQL ..."
 
   docker run --rm -d \
@@ -75,44 +72,52 @@ start() {
     --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 }
 
-initdb() {
-  echo "Initializing DB..."
-  echo "  from $BASE_DIR/db-setup.sql"
+init() {
+  echo "Initializing DB from init file $SQL_INIT_FILE ..."
 
   docker exec -i "$DOCKER_NAME_MYSQL" \
     mysql -u root --password=$MYSQL_ROOT_PASSWORD \
-    < "$BASE_DIR/db-setup.sql"
+    --default-character-set=utf8mb4 \
+    < "$SQL_INIT_FILE"
 }
 
 status() {
   docker ps --filter name="$DOCKER_NAME_MYSQL"
 }
 
-info() {
-  status
-}
-
-
-stop() {
-  echo "Stopping..."
-  docker stop "$DOCKER_NAME_MYSQL"
-}
-
 
 client() {
   docker exec -it "$DOCKER_NAME_MYSQL" \
-    mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" --password="$MYSQL_USER_PASSWORD"
+    mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
+      --password="$MYSQL_USER_PASSWORD" \
+      --default-character-set=utf8mb4 
 }
 
 client-root() {
   docker exec -it "$DOCKER_NAME_MYSQL" \
-    mysql -D "$MYSQL_DB" -u root --password="$MYSQL_ROOT_PASSWORD"
+    mysql -D "$MYSQL_DB" -u root \
+    --password="$MYSQL_ROOT_PASSWORD" \
+      --default-character-set=utf8mb4 
 }
 
-show-recs() {
+snippets() {
   docker exec -i "$DOCKER_NAME_MYSQL" \
-    mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" --password="$MYSQL_USER_PASSWORD" \
+    mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
+    --password="$MYSQL_USER_PASSWORD" \
+      --default-character-set=utf8mb4 \
     <<<"select id, title from snippets;"
+}
+
+charset() {
+  docker exec -i "$DOCKER_NAME_MYSQL" \
+    mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
+    --password="$MYSQL_USER_PASSWORD" \
+      --default-character-set=utf8mb4 \
+    <<< "SELECT * FROM performance_schema.session_variables
+WHERE VARIABLE_NAME IN (
+  'character_set_client', 'character_set_connection',
+  'character_set_results', 'collation_connection'
+) ORDER BY VARIABLE_NAME;"
 }
 
 
