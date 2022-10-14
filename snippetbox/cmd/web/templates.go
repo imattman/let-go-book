@@ -3,9 +3,14 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 
 	"snippetbox.mattman.net/internal/models"
 )
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
 
 type templateData struct {
 	Snippet  *models.Snippet
@@ -14,6 +19,10 @@ type templateData struct {
 
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := make(map[string]*template.Template)
+
+	funcMap := template.FuncMap{
+		"humanDate": humanDate,
+	}
 
 	// load all page templates
 	pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
@@ -24,8 +33,9 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
+		//create initial template set with registered functions
 		// always include the base template
-		ts, err := template.ParseFiles("./ui/html/base.tmpl")
+		ts, err := template.New(name).Funcs(funcMap).ParseFiles("./ui/html/base.tmpl")
 		if err != nil {
 			return nil, err
 		}
