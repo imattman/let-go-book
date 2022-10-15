@@ -61,6 +61,11 @@ start() {
   cd $BASE_DIR && docker-compose up -d
 }
 
+stop() {
+  echo "Stopping via docker-compose..."
+  cd $BASE_DIR && docker-compose down
+}
+
 start-manual() {
   echo "Starting container with name $DOCKER_NAME_MYSQL ..."
 
