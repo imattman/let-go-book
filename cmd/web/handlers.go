@@ -6,14 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/julienschmidt/httprouter"
 	"snippetbox.mattman.net/internal/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
 
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -28,7 +25,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -52,13 +51,12 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "view.tmpl", data)
 }
 
+// placeholder handler for displaying snippet create form
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	// limit to POST calls
-	if r.Method != http.MethodPost {
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
+	w.Write([]byte("Display the form for creating a new snippet..."))
+}
 
+func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	title := "Rime of the Ancient Mariner"
 	content := "Water, water everywhere.  All the boards did shrink.\nWater, water everywhere.  Not a drop to drink\n"
 	expires := 7
