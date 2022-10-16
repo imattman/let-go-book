@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func (app *application) logRequest(next http.Handler) http.Handler {
 
@@ -18,6 +21,24 @@ func secureHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				// this will trigger the http server to automatically close the connection
+				// after sending the response
+				w.Header().Set("Connection", "close")
+
+				// present basic error to client
+				// note: err could be any time, so we format it as a string
+				app.serverError(w, fmt.Errorf("%s", err))
+			}
+		}()
 
 		next.ServeHTTP(w, r)
 	})
