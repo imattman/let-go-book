@@ -17,7 +17,7 @@ func (app *application) routes() http.Handler {
 
 	// server static files from ./ui/static at URI base /static
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	router.Handler(http.MethodGet, "/static/", disableDirListing(http.StripPrefix("/static", fileServer)))
+	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
 
 	router.HandlerFunc(http.MethodGet, "/", app.home)
 	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetView)
