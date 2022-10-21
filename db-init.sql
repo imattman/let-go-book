@@ -14,6 +14,17 @@ CREATE TABLE snippets (
 
 CREATE INDEX idx_snippets_created ON snippets(created);
 
+
+-- user sessions table
+
+CREATE TABLE sessions (
+  token CHAR(43) PRIMARY KEY,
+  data BLOB NOT NULL,
+  expiry TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX idx_sessions_expiry on sessions(expiry);
+
 -- application user
 DROP USER IF EXISTS 'web'@'%';
 
