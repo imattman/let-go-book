@@ -80,10 +80,16 @@ start-manual() {
 init() {
   echo "Initializing DB from init file $SQL_INIT_FILE ..."
 
-  docker exec -i "$DOCKER_NAME_MYSQL" \
+  if [[ ! $(which docker) && $(which mysql) ]]; then
     mysql -u root --password=$MYSQL_ROOT_PASSWORD \
     --default-character-set=utf8mb4 \
     < "$SQL_INIT_FILE"
+  else
+    docker exec -i "$DOCKER_NAME_MYSQL" \
+      mysql -u root --password=$MYSQL_ROOT_PASSWORD \
+      --default-character-set=utf8mb4 \
+      < "$SQL_INIT_FILE"
+  fi
 }
 
 status() {
@@ -92,37 +98,67 @@ status() {
 
 
 client() {
-  docker exec -it "$DOCKER_NAME_MYSQL" \
+  if [[ ! $(which docker) && $(which mysql) ]]; then
     mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
       --password="$MYSQL_USER_PASSWORD" \
       --default-character-set=utf8mb4 
+  else
+    docker exec -it "$DOCKER_NAME_MYSQL" \
+      mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
+        --password="$MYSQL_USER_PASSWORD" \
+        --default-character-set=utf8mb4 
+  fi
 }
 
 client-root() {
-  docker exec -it "$DOCKER_NAME_MYSQL" \
+  if [[ ! $(which docker) && $(which mysql) ]]; then
     mysql -D "$MYSQL_DB" -u root \
     --password="$MYSQL_ROOT_PASSWORD" \
       --default-character-set=utf8mb4 
+  else
+    docker exec -it "$DOCKER_NAME_MYSQL" \
+      mysql -D "$MYSQL_DB" -u root \
+      --password="$MYSQL_ROOT_PASSWORD" \
+        --default-character-set=utf8mb4 
+  fi
 }
 
 snippets() {
-  docker exec -i "$DOCKER_NAME_MYSQL" \
+  if [[ ! $(which docker) && $(which mysql) ]]; then
     mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
     --password="$MYSQL_USER_PASSWORD" \
       --default-character-set=utf8mb4 \
     <<<"select id, title from snippets;"
+  else
+    docker exec -i "$DOCKER_NAME_MYSQL" \
+      mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
+      --password="$MYSQL_USER_PASSWORD" \
+        --default-character-set=utf8mb4 \
+      <<<"select id, title from snippets;"
+  fi
 }
 
 charset() {
-  docker exec -i "$DOCKER_NAME_MYSQL" \
+  if [[ ! $(which docker) && $(which mysql) ]]; then
     mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
     --password="$MYSQL_USER_PASSWORD" \
       --default-character-set=utf8mb4 \
     <<< "SELECT * FROM performance_schema.session_variables
-WHERE VARIABLE_NAME IN (
-  'character_set_client', 'character_set_connection',
-  'character_set_results', 'collation_connection'
-) ORDER BY VARIABLE_NAME;"
+      WHERE VARIABLE_NAME IN (
+        'character_set_client', 'character_set_connection',
+        'character_set_results', 'collation_connection'
+      ) ORDER BY VARIABLE_NAME;"
+  else
+    docker exec -i "$DOCKER_NAME_MYSQL" \
+      mysql -D "$MYSQL_DB" -u "$MYSQL_USER_NAME" \
+      --password="$MYSQL_USER_PASSWORD" \
+        --default-character-set=utf8mb4 \
+      <<< "SELECT * FROM performance_schema.session_variables
+        WHERE VARIABLE_NAME IN (
+          'character_set_client', 'character_set_connection',
+          'character_set_results', 'collation_connection'
+        ) ORDER BY VARIABLE_NAME;"
+  fi
 }
 
 
