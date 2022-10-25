@@ -79,6 +79,13 @@ func main() {
 		ErrorLog:  errorLog,
 		Handler:   app.routes(),
 		TLSConfig: &tlsConfig,
+
+		IdleTimeout: time.Minute,
+		// note: could instead set ReadHeaderTimeout
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+
+		MaxHeaderBytes: 512 * 1024, // 0.5mb
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
