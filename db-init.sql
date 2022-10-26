@@ -14,6 +14,25 @@ CREATE TABLE snippets (
 
 CREATE INDEX idx_snippets_created ON snippets(created);
 
+-- users table
+
+CREATE TABLE users (
+  id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  hashed_password VARCHAR(60) NOT NULL,
+  created DATETIME NOT NULL
+);
+
+ALTER TABLE users ADD CONSTRAINT user_uc_email UNIQUE(email);
+
+-- INSERT INTO users (name, email, hashed_password, created) VALUES (
+--   'demo',
+--   'demo@example.com',
+--   '',
+--   UTC_TIMESTAMP()
+-- );
+
 
 -- user sessions table
 
