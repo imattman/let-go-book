@@ -74,3 +74,17 @@ INSERT INTO snippets (title, content, created, expires) VALUES (
   DATE_ADD(UTC_TIMESTAMP(), INTERVAL 7 DAY)
 );
 
+INSERT INTO snippets (title, content, created, expires) VALUES (
+  'one fish two fish',
+  'One fish\nTwo fish\nRed fish\nBlue fish\n\n- Dr. Seuss',
+  UTC_TIMESTAMP(),
+  DATE_ADD(UTC_TIMESTAMP(), INTERVAL 7 DAY)
+);
+
+INSERT INTO snippets (title, content, created, expires) VALUES (
+  'Rime of the Ancient Mariner',
+  'Water, water every where\nand all the boards did shrink;\nWater, water every where\nnor any drop to drink.\n\n-Coleridge',
+  UTC_TIMESTAMP(),
+  DATE_ADD(UTC_TIMESTAMP(), INTERVAL 7 DAY)
+);
+

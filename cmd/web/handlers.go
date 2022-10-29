@@ -11,6 +11,13 @@ import (
 	"snippetbox.mattman.net/internal/validator"
 )
 
+type userSignupForm struct {
+	Name                string `form:"Name"`
+	Email               string `form:"Email"`
+	Password            string `form:"Password"`
+	validator.Validator `form:"-"`
+}
+
 type snippetCreateForm struct {
 	Title               string `form:"title"`
 	Content             string `form:"content"`
@@ -103,7 +110,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Display HTML form for signing up new user...")
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+	app.render(w, http.StatusOK, "signup.tmpl", data)
 }
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
