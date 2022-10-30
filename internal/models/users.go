@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	errMySQLDupEntry = 1062
+	mySQLErrDupEntry = 1062 // MySQL error number when UNIQUE constraint violated
 )
 
 type User struct {
@@ -40,7 +40,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
 			// check MySQL error code and that message contains index name
-			if mySQLError.Number == errMySQLDupEntry &&
+			if mySQLError.Number == mySQLErrDupEntry &&
 				strings.Contains(mySQLError.Message, "user_uc_email") {
 				return ErrDuplicateEmail
 			}
