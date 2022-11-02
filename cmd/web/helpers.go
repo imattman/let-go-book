@@ -10,6 +10,14 @@ import (
 	"github.com/go-playground/form/v4"
 )
 
+const (
+	sessionUserIdKey = "authenticatedUserID"
+)
+
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), sessionUserIdKey)
+}
+
 func (app *application) decodePostForm(r *http.Request, dst any) error {
 	err := r.ParseForm()
 	if err != nil {

@@ -11,10 +11,6 @@ import (
 	"snippetbox.mattman.net/internal/validator"
 )
 
-const (
-	sessionUserIdKey = "authenticatedUserID"
-)
-
 type userSignupForm struct {
 	Name                string `form:"name"`
 	Email               string `form:"email"`
