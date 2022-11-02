@@ -15,6 +15,7 @@ const (
 )
 
 func (app *application) isAuthenticated(r *http.Request) bool {
+	// app.infoLog.Printf("session: %#v", app.sessionManager.Get(r.Context(), sessionUserIdKey))
 	return app.sessionManager.Exists(r.Context(), sessionUserIdKey)
 }
 
